@@ -1,0 +1,41 @@
+[
+  {
+    "title": "Verify that 'Create Event' button isn't enabled when 'Event image' is blank",
+    "steps": [
+      "Navigate to Event page",
+      "Click 'Add event' page",
+      "Fill in 'Event Name' field with valid data, e.g. 'eventName'",
+      "Pick up any valid date range at 'Duration' date-picker",
+      "Fill in 'Event URL' field with valid url including 'https://' prefix",
+      "Select any checkbox at 'Appearance type' section",
+      "Fill in 'Short Description' field with text with min 100 characters and max 500"
+    ],
+    "result": ["'Create Event' button should not be enabled"]
+  },
+  {
+    "title": "Verify that 'Create Event' button isn't enabled when 'Event Name' is blank",
+    "steps": [
+      "Navigate to Event page",
+      "Click 'Add event' page",
+      "Upload any valid WEBP, JPG or PNG image with up to 300 KB size at 'Event image' section",
+      "Pick up any valid date range at 'Duration' date-picker",
+      "Fill in 'Event URL' field with valid url including 'https://' prefix",
+      "Select any checkbox at 'Appearance type' section",
+      "Fill in 'Short Description' field with text with min 100 characters and max 500"
+    ],
+    "result": ["'Create Event' button should not be enabled"]
+  },
+  {
+    "title": "Verify that user isn't able to fill in 'Event URL' field without 'https://' prefix",
+    "steps": [
+      "Navigate to Event page",
+      "Click 'Add event' page",
+      "Fill in 'Event URL' field with a valid URL without 'https://' prefix"
+    ],
+    "result": [
+      "'URLs must contain https:// prefix' notification should appear",
+      "'Event URL' field should be highlighted in red"
+    ]
+  }
+  // ...
+]

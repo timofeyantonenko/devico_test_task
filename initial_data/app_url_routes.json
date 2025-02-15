@@ -1,0 +1,66 @@
+{
+  "privateRoutes": [
+    {
+      "path": "/",
+      "children": [
+        {
+          "path": "/reviews",
+          "children": [
+            {
+              "path": "/create"
+            }
+          ]
+        },
+        {
+          "path": "/organization"
+        },
+        {
+          "path": "/event-resources",
+          "children": [
+            {
+              "path": "/create"
+            }
+          ]
+        },
+        {
+          "path": "/events",
+          "children": [
+            {
+              "path": "/create"
+            }
+          ]
+        },
+        {
+          "path": "/team-bio",
+          "children": [
+            {
+              "path": "/create"
+            }
+          ]
+        },
+        {
+          "path": "/portfolio",
+          "children": [
+            {
+              "path": "/create"
+            }
+          ]
+        },
+        {
+          "path": "/sponsored"
+        }
+      ]
+    }
+  ],
+  "publicRoutes": [
+    {
+      "path": "/sign-in"
+    },
+    {
+      "path": "/get-listed"
+    },
+    {
+      "path": "/reset-password"
+    }
+  ]
+}

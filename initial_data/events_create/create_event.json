@@ -1,0 +1,117 @@
+{
+  "forms": [
+    {
+      "name": "Add new event",
+      "selector": "form",
+      "fields": [
+        {
+          "name": "organization",
+          "type": "text",
+          "label": "Organization Name*",
+          "value": "Vendors",
+          "disabled": true,
+          "isRequired": false,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.MuiFormControl-root.MuiFormControl-fullWidth.MuiTextField-root.css-asdas2 > div > input"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "label": "Event Name*",
+          "disabled": false,
+          "isRequired": true,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.MuiFormControl-root.MuiFormControl-fullWidth.MuiTextField-root.css-feqhe6 > div > input"
+        },
+        {
+          "name": "url",
+          "type": "text",
+          "label": "Event URL*",
+          "disabled": false,
+          "isRequired": true,
+          "placeholder": "https://www.eventwebsite.com/",
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-1rii66k.e1vcjija7 > div.MuiFormControl-root.MuiFormControl-fullWidth.css-tzsjye > div > div > input"
+        },
+        {
+          "name": "duration",
+          "type": "text",
+          "label": "Duration*",
+          "disabled": false,
+          "isRequired": true,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-1rii66k.e1vcjija7 > div.MuiFormControl-root.MuiFormControl-fullWidth.css-tzsjye > div > div > input"
+        },
+        {
+          "name": "image",
+          "type": "file",
+          "label": "Event image*",
+          "disabled": false,
+          "isRequired": true,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-8nndim.e1vcjija6 > div:nth-child(1) > div > div > input[type=file]"
+        }
+      ],
+      "checkboxes": [
+        {
+          "name": "exhibitor",
+          "label": "Exhibitor",
+          "defaultChecked": false,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-x04zti.e1vcjija3 > div.css-ga3b11.e1vcjija1 > label:nth-child(1) > span.MuiButtonBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.PrivateSwitchBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.css-130go0e > input",
+          "isRequired": false,
+          "disabled": false
+        },
+        {
+          "name": "speaker",
+          "label": "Speaker",
+          "defaultChecked": false,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-x04zti.e1vcjija3 > div.css-ga3b11.e1vcjija1 > label:nth-child(2) > span.MuiButtonBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.PrivateSwitchBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.css-130go0e > input",
+          "isRequired": false,
+          "disabled": false
+        },
+        {
+          "name": "sponsor",
+          "label": "Sponsor",
+          "defaultChecked": false,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-x04zti.e1vcjija3 > div.css-ga3b11.e1vcjija1 > label:nth-child(3) > span.MuiButtonBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.PrivateSwitchBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.css-130go0e > input",
+          "isRequired": false,
+          "disabled": false
+        },
+        {
+          "name": "organizer",
+          "label": "Organizer",
+          "defaultChecked": false,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-x04zti.e1vcjija3 > div.css-ga3b11.e1vcjija1 > label:nth-child(4) > span.MuiButtonBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.PrivateSwitchBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.css-130go0e > input",
+          "isRequired": false,
+          "disabled": false
+        },
+        {
+          "name": "contestant",
+          "label": "Contestant",
+          "defaultChecked": false,
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-x04zti.e1vcjija3 > div.css-ga3b11.e1vcjija1 > label:nth-child(5) > span.MuiButtonBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.PrivateSwitchBase-root.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.MuiCheckbox-root.MuiCheckbox-colorPrimary.MuiCheckbox-sizeMedium.css-130go0e > input",
+          "isRequired": false,
+          "disabled": false
+        }
+      ],
+      "buttons": [
+        {
+          "name": "back",
+          "label": "Back",
+          "type": "button",
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > button",
+          "disabled": false
+        },
+        {
+          "name": "cancel",
+          "label": "Cancel",
+          "type": "button",
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-unrh3l.e1vcjija2 > button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedError.MuiButton-sizeMedium.MuiButton-outlinedSizeMedium.MuiButton-root.MuiButton-outlined.MuiButton-outlinedError.MuiButton-sizeMedium.MuiButton-outlinedSizeMedium.css-w1iimf",
+          "disabled": false
+        },
+        {
+          "name": "create",
+          "label": "Create Event",
+          "type": "button",
+          "selector": "#root > div > div.css-1ae0qw5.e1crt2dv0 > div > form > div.css-unrh3l.e1vcjija2 > button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedInfo.MuiButton-sizeMedium.MuiButton-containedSizeMedium.Mui-disabled.MuiButton-root.MuiButton-contained.MuiButton-containedInfo.MuiButton-sizeMedium.MuiButton-containedSizeMedium.css-1feu3p5",
+          "disabled": true
+        }
+      ]
+    }
+  ]
+}

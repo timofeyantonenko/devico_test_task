@@ -1,0 +1,13 @@
+{
+  "page": {
+    "buttons": [
+      {
+        "name": "button",
+        "label": "Add New Event",
+        "type": "button",
+        "selector": "div.css-bcffy2 > div.css-1wcglds + div > button",
+        "disabled": false
+      }
+    ]
+  }
+}
