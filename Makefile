@@ -6,7 +6,7 @@ VENV := venv
 VENV_BIN := $(VENV)/bin
 
 # Project settings
-MAIN_FILE := main.py
+MAIN_FILE := src.main
 TEST_DIR := tests
 
 # Installation
@@ -17,7 +17,7 @@ install:
 
 # Run the application
 run:
-	$(VENV_BIN)/python $(MAIN_FILE)
+	PYTHONPATH=$(PYTHONPATH):. $(VENV_BIN)/python -m $(MAIN_FILE)
 
 # Format code using black
 apply_formatting:
@@ -32,7 +32,7 @@ check_formatting:
 
 # Run tests with pytest
 test:
-	$(VENV_BIN)/pytest $(TEST_DIR) -v --cov=. --cov-report=term-missing
+	PYTHONPATH=$(PYTHONPATH):. $(VENV_BIN)/pytest $(TEST_DIR)/ -v -W ignore::pytest.PytestCollectionWarning --cov=. --cov-report=term-missing
 
 # Clean up python cache and virtual environment
 clean:

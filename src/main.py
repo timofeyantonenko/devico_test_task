@@ -10,6 +10,8 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from .utils import create_excel_file, openai_api_calculate_cost
+
 # Load environment variables
 load_dotenv()
 
@@ -31,6 +33,8 @@ APP_DESCRIPTION_FILE_NAME = os.getenv(
 
 
 class TestPerspective(Enum):
+    """Enum defining different perspectives for test case generation."""
+
     FUNCTIONAL = "functional"
     SECURITY = "security"
     ACCESSIBILITY = "accessibility"
@@ -39,12 +43,16 @@ class TestPerspective(Enum):
 
 
 class PerspectiveConfig(BaseModel):
+    """Configuration model for test perspective settings."""
+
     name: TestPerspective
     temperature: float
     system_prompt: str
 
 
 class ElementContext(BaseModel):
+    """Model representing the context of an HTML element for test generation."""
+
     element_id: str
     element_type: str
     element_data: dict
@@ -116,6 +124,8 @@ TEST_PERSPECTIVES = [
 
 
 class TestMetadata(BaseModel):
+    """Model for storing metadata about test case generation."""
+
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
     model_version: str
     temperature: float
@@ -125,6 +135,8 @@ class TestMetadata(BaseModel):
 
 
 class GeneratedTestCase(BaseModel):
+    """Model representing a single generated test case."""
+
     title: str
     steps: list[str]
     result: list[str]
@@ -134,29 +146,57 @@ class GeneratedTestCase(BaseModel):
 
 
 class TestGenerationResult(BaseModel):
+    """Model containing a collection of generated test cases."""
+
     test_cases: list[GeneratedTestCase]
 
 
 class ExpertValidatedTests(BaseModel):
+    """Model representing test cases that have been validated by an expert."""
+
     test_cases: list[GeneratedTestCase]
 
 
 class TestGenerationResultWithMetadata(BaseModel):
+    """Model combining test generation results with their metadata."""
+
     result: TestGenerationResult
     metadata: TestMetadata
 
 
 class ExpertValidatedTestsWithMetadata(BaseModel):
+    """Model combining expert-validated tests with validation metadata."""
+
     result: ExpertValidatedTests
     validation_metadata: TestMetadata  # metadata from expert validation
 
 
 class TestCaseGenerator:
+    """
+    A class for generating comprehensive test cases for web applications from multiple testing perspectives.
+    Handles test case generation, validation, and storage for different pages and elements.
+    """
+
     def __init__(self, initial_data_path: str):
+        """
+        Initialize the TestCaseGenerator with the path to initial data.
+
+        Args:
+            initial_data_path (str): Path to the directory containing initial test data
+        """
         self.base_path = Path(initial_data_path)
         self.routes = self._load_json(APP_URL_ROUTES_FILE_NAME)
         self.app_description = self._load_text(APP_DESCRIPTION_FILE_NAME)
         self._client = OpenAI()
+
+        self.total_prompt_non_cached_tokens = 0
+        self.total_prompt_cached_tokens = 0
+        self.total_completion_tokens = 0
+        self.total_total_tokens = 0
+        self.total_prompt_non_cached_cost = 0
+        self.total_prompt_cached_cost = 0
+        self.total_completion_cost = 0
+        self.total_total_cost = 0
 
     def _load_json(self, filename: str) -> dict:
         """Load and parse JSON file"""
@@ -179,7 +219,7 @@ class TestCaseGenerator:
     def _load_page_data(self, page_dir: str) -> dict:
         """Load all data for a specific page"""
         dir_path = self.base_path / page_dir
-        data = {"html": "", "elements": ""}
+        data = {"html": "", "elements": dict()}
 
         # Load HTML content
         html_files = list(dir_path.glob("*.html"))
@@ -237,6 +277,13 @@ class TestCaseGenerator:
 
         return paths
 
+    def _add_usage_info(self, usage_info):
+        """Add API usage information and update total costs."""
+        cost_breakdown = openai_api_calculate_cost(usage_info, model=MODEL_NAME)
+        for cost_metric_name, cost_metric_value in cost_breakdown.items():
+            current_val = getattr(self, f"total_{cost_metric_name}")
+            setattr(self, f"total_{cost_metric_name}", current_val + cost_metric_value)
+
     @retry(
         stop=stop_after_attempt(RETRY_ATTEMPTS),
         wait=wait_exponential(multiplier=1, min=4, max=60),
@@ -258,21 +305,19 @@ class TestCaseGenerator:
                 response_format=TestGenerationResult,
                 temperature=temperature,
             )
-
-            logger.info("Usage info")
-            openai_api_calculate_cost(response.usage)
+            self._add_usage_info(response.usage)
 
             # Create metadata
             metadata = TestMetadata(
                 model_version=MODEL_NAME,
                 temperature=temperature,
-                input_tokens=response.usage.prompt_tokens,
-                output_tokens=response.usage.completion_tokens,
-                total_tokens=response.usage.total_tokens,
+                input_tokens=response.usage.prompt_tokens,  # type: ignore
+                output_tokens=response.usage.completion_tokens,  # type: ignore
+                total_tokens=response.usage.total_tokens,  # type: ignore
             )
 
             # Parse the response
-            parsed_response = json.loads(response.choices[0].message.content)
+            parsed_response = json.loads(response.choices[0].message.content)  # type: ignore
             # Extract the test_cases list from the response
             test_cases = parsed_response.get("test_cases", [])
             result = TestGenerationResult(test_cases=test_cases)
@@ -309,19 +354,18 @@ class TestCaseGenerator:
                 temperature=EXPERT_TEMPERATURE,
             )
 
-            logger.info("Usage info")
-            openai_api_calculate_cost(response.usage)
+            self._add_usage_info(response.usage)
 
             # Create validation metadata
             validation_metadata = TestMetadata(
                 model_version=MODEL_NAME,
                 temperature=EXPERT_TEMPERATURE,
-                input_tokens=response.usage.prompt_tokens,
-                output_tokens=response.usage.completion_tokens,
-                total_tokens=response.usage.total_tokens,
+                input_tokens=response.usage.prompt_tokens,  # type: ignore
+                output_tokens=response.usage.completion_tokens,  # type: ignore
+                total_tokens=response.usage.total_tokens,  # type: ignore
             )
 
-            parsed_response = json.loads(response.choices[0].message.content)
+            parsed_response = json.loads(response.choices[0].message.content)  # type: ignore
             validated_test_cases = parsed_response.get("test_cases", [])
             return ExpertValidatedTestsWithMetadata(
                 result=ExpertValidatedTests(test_cases=validated_test_cases),
@@ -337,7 +381,7 @@ class TestCaseGenerator:
     ) -> str:
         """Create prompt for expert validation"""
         # Group test cases by perspective for better organization
-        test_cases_by_perspective = {}
+        test_cases_by_perspective: dict[str, list] = {}
         for result in test_results:
             for test in result.result.test_cases:
                 perspective = test.category
@@ -575,7 +619,7 @@ class TestCaseGenerator:
         {TEST_CASES_DEFINITION_PROMPT.format(perspective=perspective.name.value)}
         """
 
-    def generate_all_test_cases(self) -> dict[str, ExpertValidatedTests]:
+    def generate_all_test_cases(self) -> dict[str, ExpertValidatedTestsWithMetadata]:
         """Generate test cases for all available pages"""
         test_cases = {}
 
@@ -595,216 +639,83 @@ class TestCaseGenerator:
 
         return test_cases
 
+    def save_test_cases(self, test_cases: dict[str, ExpertValidatedTestsWithMetadata]):
+        """
+        Save generated test cases with metadata in both JSON and XLSX formats.
+        Creates a separate directory for each page and saves individual files.
 
-def openai_api_calculate_cost(usage, model=MODEL_NAME):
-    """
-    Calculate OpenAI API cost taking into account cached tokens.
+        Args:
+            test_cases: Dictionary mapping page paths to their test cases and metadata
+        """
 
-    Args:
-        usage: Response usage object containing token counts and details
-        model: Model identifier (default: MODEL_NAME)
+        # Create output directory
+        output_dir = Path(OUTPUT_PATH)
+        output_dir.mkdir(exist_ok=True)
 
-    Returns:
-        float: Total cost in USD
-
-    Pricing info:
-    1) https://platform.openai.com/docs/pricing
-    2) https://openai.com/api/pricing/
-    """
-    pricing_per_1m_tokens = {
-        "o1": {
-            "prompt": 15,
-            "cached": 7.5,
-            "completion": 60,
-        },
-        "o3-mini": {
-            "prompt": 1.1,
-            "cached": 0.55,
-            "completion": 4.4,
-        },
-        "gpt-4o": {
-            "prompt": 2.5,
-            "cached": 1.25,
-            "completion": 10,
-        },
-    }
-
-    try:
-        model_pricing = pricing_per_1m_tokens[model]
-    except KeyError:
-        raise ValueError(f"Invalid model specified: {model}")
-
-    # Get cached tokens count
-    cached_tokens = (
-        usage.prompt_tokens_details.cached_tokens
-        if hasattr(usage, "prompt_tokens_details")
-        else 0
-    )
-
-    # Calculate non-cached prompt tokens
-    non_cached_prompt_tokens = usage.prompt_tokens - cached_tokens
-
-    # Calculate costs for each component
-    prompt_cost = non_cached_prompt_tokens * model_pricing["prompt"] / 1_000_000
-    cached_cost = cached_tokens * model_pricing["cached"] / 1_000_000
-    completion_cost = usage.completion_tokens * model_pricing["completion"] / 1_000_000
-
-    total_cost = prompt_cost + cached_cost + completion_cost
-    total_cost = round(total_cost, 6)
-
-    logger.info(f"\nTokens used:")
-    logger.info(f"  Prompt (non-cached): {non_cached_prompt_tokens:,} tokens")
-    logger.info(f"  Prompt (cached): {cached_tokens:,} tokens")
-    logger.info(f"  Completion: {usage.completion_tokens:,} tokens")
-    logger.info(f"  Total: {usage.total_tokens:,} tokens")
-    logger.info(f"\nCosts breakdown:")
-    logger.info(f"  Prompt (non-cached): ${prompt_cost:.4f}")
-    logger.info(f"  Prompt (cached): ${cached_cost:.4f}")
-    logger.info(f"  Completion: ${completion_cost:.4f}")
-    logger.info(f"Total cost for {model}: ${total_cost:.4f}\n")
-
-    return total_cost
-
-
-def save_test_cases(test_cases: dict[str, ExpertValidatedTestsWithMetadata]):
-    """
-    Save generated test cases with metadata in both JSON and XLSX formats.
-    Creates a separate directory for each page and saves individual files.
-
-    Args:
-        test_cases: Dictionary mapping page paths to their test cases and metadata
-    """
-    import json
-    from datetime import datetime
-    from pathlib import Path
-
-    from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Font, PatternFill
-    from openpyxl.utils import get_column_letter
-
-    def create_excel_file(test_cases_data: list, filepath: Path):
-        """Create formatted Excel file from test cases data"""
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Test Cases"
-
-        # Define styles
-        header_fill = PatternFill(
-            start_color="366092", end_color="366092", fill_type="solid"
-        )
-        header_font = Font(color="FFFFFF", bold=True)
-        wrap_alignment = Alignment(wrap_text=True, vertical="top")
-
-        # Define headers
-        headers = [
-            "#",
-            "Title",
-            "Steps",
-            "Expected Result",
-            "Priority",
-            "Category",
-            "Est. Time",
-        ]
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.fill = header_fill
-            cell.font = header_font
-
-        # Add data
-        for row, test_case in enumerate(test_cases_data, 2):
-            # Add test case number
-            ws.cell(row=row, column=1, value=row - 1)  # Start numbering from 1
-
-            # Add other test case data
-            ws.cell(row=row, column=2, value=test_case["title"])
-            ws.cell(
-                row=row,
-                column=3,
-                value="\n".join(f"- {step}" for step in test_case["steps"]),
-            )
-            ws.cell(
-                row=row,
-                column=4,
-                value="\n".join(f"- {result}" for result in test_case["result"]),
-            )
-            ws.cell(row=row, column=5, value=test_case["priority"])
-            ws.cell(row=row, column=6, value=test_case["category"])
-            ws.cell(row=row, column=7, value=test_case["estimated_time"])
-
-        # Apply formatting
-        for row in ws.iter_rows(min_row=1, max_row=len(test_cases_data) + 1):
-            for cell in row:
-                cell.alignment = wrap_alignment
-
-        # Adjust column widths
-        column_widths = {
-            1: 8,  # #
-            2: 40,  # Title
-            3: 50,  # Steps
-            4: 50,  # Expected Result
-            5: 15,  # Priority
-            6: 15,  # Category
-            7: 15,  # Est. Time
+        cost_info = {
+            "total_prompt_non_cached_tokens": self.total_prompt_non_cached_tokens,
+            "total_prompt_cached_tokens": self.total_prompt_cached_tokens,
+            "total_completion_tokens": self.total_completion_tokens,
+            "total_tokens": self.total_total_tokens,
+            "total_prompt_non_cached_cost": self.total_prompt_non_cached_cost,
+            "total_prompt_cached_cost": self.total_prompt_cached_cost,
+            "total_completion_cost": self.total_completion_cost,
+            "total_cost": self.total_total_cost,
         }
 
-        for col, width in column_widths.items():
-            ws.column_dimensions[get_column_letter(col)].width = width
-
-        # Save the workbook
-        wb.save(filepath)
-
-    # Create output directory
-    output_dir = Path(OUTPUT_PATH)
-    output_dir.mkdir(exist_ok=True)
-
-    # Prepare main test_cases.json
-    output_data = {
-        "generated_at": datetime.now().isoformat(),
-        "model_version": MODEL_NAME,
-        "pages": {
-            page: {
-                "test_cases": test_case.result.model_dump().get("test_cases", []),
-                "validation_metadata": test_case.validation_metadata.model_dump(),
-            }
-            for page, test_case in test_cases.items()
-        },
-    }
-
-    # Save main test_cases.json
-    with open(output_dir / "test_cases.json", "w") as f:
-        json.dump(output_data, f, indent=2)
-
-    # Create individual page directories and files
-    for page_path, test_case in test_cases.items():
-        # Create page directory
-        page_dir = output_dir / page_path
-        page_dir.mkdir(exist_ok=True, parents=True)
-
-        # Get test cases data
-        page_test_cases = test_case.result.model_dump().get("test_cases", [])
-        page_metadata = test_case.validation_metadata.model_dump()
-
-        # Save page-specific JSON
-        page_data = {
+        # Prepare main test_cases.json
+        output_data = {
             "generated_at": datetime.now().isoformat(),
             "model_version": MODEL_NAME,
-            "test_cases": page_test_cases,
-            "metadata": page_metadata,
+            "cost_info": cost_info,
+            "pages": {
+                page: {
+                    "test_cases": test_case.result.model_dump().get("test_cases", []),
+                    "validation_metadata": test_case.validation_metadata.model_dump(),
+                }
+                for page, test_case in test_cases.items()
+            },
         }
 
-        try:
-            with open(page_dir / "test_cases.json", "w") as f:
-                json.dump(page_data, f, indent=2)
-        except Exception as e:
-            logger.error(f"Error saving JSON for page {page_path}: {e}")
+        # Save main test_cases.json
+        with open(output_dir / "test_cases.json", "w") as f:
+            json.dump(output_data, f, indent=2)
 
-        # Create and save Excel file
-        try:
-            create_excel_file(page_test_cases, page_dir / "test_cases.xlsx")
-        except Exception as e:
-            logger.error(f"Error saving Excel file for page {page_path}: {e}")
+        # Create individual page directories and files
+        for page_path, test_case in test_cases.items():
+            # Create page directory
+            page_dir = output_dir / page_path
+            page_dir.mkdir(exist_ok=True, parents=True)
 
-    logger.info(f"Test cases saved successfully in {output_dir}")
+            # Get test cases data
+            page_test_cases = test_case.result.model_dump().get("test_cases", [])
+            page_metadata = test_case.validation_metadata.model_dump()
+
+            # Save page-specific JSON
+            page_data = {
+                "generated_at": datetime.now().isoformat(),
+                "model_version": MODEL_NAME,
+                "test_cases": page_test_cases,
+                "metadata": page_metadata,
+            }
+
+            try:
+                with open(page_dir / "test_cases.json", "w") as f:
+                    json.dump(page_data, f, indent=2)
+            except Exception as e:
+                logger.error(f"Error saving JSON for page {page_path}: {e}")
+
+            # Create and save Excel file
+            try:
+                create_excel_file(page_test_cases, page_dir / "test_cases.xlsx")
+            except Exception as e:
+                logger.error(f"Error saving Excel file for page {page_path}: {e}")
+
+        logger.info("*" * 50)
+        logger.info("Costs summary:")
+        logger.info("\n%s", json.dumps(cost_info, indent=4))
+        logger.info("*" * 50)
+        logger.info(f"Test cases saved successfully in {output_dir}")
 
 
 def main():
@@ -815,7 +726,7 @@ def main():
     test_cases = generator.generate_all_test_cases()
 
     # Save results
-    save_test_cases(test_cases)
+    generator.save_test_cases(test_cases)
 
     logger.info("Test cases generated and validated successfully!")
 

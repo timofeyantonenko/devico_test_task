@@ -1,5 +1,5 @@
-# devico_test_task
-devico_test_task
+# Test cases generator
+This repo represents Tymofii Antonenko's implementation of test task by Devico.
 
 ## Prerequesites/tech details
 1. Python 3.11+
@@ -13,12 +13,13 @@ devico_test_task
 3. I assumed you have OpenAI API key
 
 
-
-# How I selected LLM for this task:
+## How I selected LLM for this task:
 1) It was recommended to use OpanAI LLMs
 2) I wanted to use structured output feature
 3) I took a look at a few leaderboards: (alpaca_eval)[https://tatsu-lab.github.io/alpaca_eval/], (vellum)[https://www.vellum.ai/llm-leaderboard] and (lmarena)[https://lmarena.ai/?leaderboard] and (aider)[https://aider.chat/docs/leaderboards/]
 
-# TODO
+
+## TODO / Potential improvements
 1) Handle case when html is too big and doesn't fit into one prompt
-2) 
+2) Add usage of multithreading/multiprocessing.  
+I didn't do it because I already was getting 429 - Too Many Requests
