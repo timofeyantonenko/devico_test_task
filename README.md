@@ -10,9 +10,11 @@ please select any other version which you have locally and which is at least 3.9
 2. OpenAI API key [https://platform.openai.com/api-keys]
 3. `make` command (for Linux/Mac users)
 
+## Assumptions
+1. I assumed that for one route, its' HTML and JSON would fit into models' context window.
+2. I didn't use Langchain etc., to simplify the dependencies of the project.
 
 ## How to run
-
 0. Clone the repository:
 ```bash
 git clone git@github.com:timofeyantonenko/devico_test_task.git
@@ -52,12 +54,14 @@ make run
    - Excel spreadsheets for each page
    - Summary reports with costs and metadata
 
-
-## Assumptions
-1. I assumed that for one route, its' HTML and JSON would fit into models' context window.
-2. I didn't use Langchain etc., to simplify the dependencies of the project.
-3. I assumed you have OpenAI API key
-
+## Available Make Commands
+- `make install` - Set up the environment
+- `make run` - Generate test cases
+- `make clean` - Remove generated files and virtual environment
+- `make test` - Run test suite
+- `make check_formatting` - Check code style
+- `make apply_formatting` - Apply code formatting
+- `make help` - Show all available commands
 
 ## How I selected LLM for this task:
 1) It was recommended to use OpanAI LLMs
@@ -68,7 +72,6 @@ make run
   - [LM Arena](https://lmarena.ai/?leaderboard)
   - [Aider](https://aider.chat/docs/leaderboards/)
 Based on all of this, I think `gpt-4o` should be fine as the default.
-
 
 ## TODO / Potential improvements
 1) Handle case when html is too big and doesn't fit into one prompt

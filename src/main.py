@@ -101,23 +101,23 @@ TEST_PERSPECTIVES = [
     PerspectiveConfig(
         name=TestPerspective.SECURITY,
         temperature=0.8,
-        system_prompt="You are a security testing expert. Generate test cases that identify potential security vulnerabilities, validate input sanitization, and verify access controls."
+        system_prompt="You are a security testing expert. Generate test cases that identify potential security vulnerabilities, validate input sanitization, and verify access controls.",
     ),
     PerspectiveConfig(
         name=TestPerspective.ACCESSIBILITY,
         temperature=0.6,
-        system_prompt="You are an accessibility testing expert. Generate test cases that verify WCAG compliance, screen reader compatibility, and keyboard navigation."
+        system_prompt="You are an accessibility testing expert. Generate test cases that verify WCAG compliance, screen reader compatibility, and keyboard navigation.",
     ),
     PerspectiveConfig(
         name=TestPerspective.PERFORMANCE,
         temperature=0.7,
-        system_prompt="You are a performance testing expert. Generate test cases that verify load times, resource usage, and responsiveness under different conditions."
+        system_prompt="You are a performance testing expert. Generate test cases that verify load times, resource usage, and responsiveness under different conditions.",
     ),
     PerspectiveConfig(
         name=TestPerspective.USABILITY,
         temperature=0.8,
-        system_prompt="You are a usability testing expert. Generate test cases that verify user experience, interface consistency, and error handling from a user's perspective."
-    )
+        system_prompt="You are a usability testing expert. Generate test cases that verify user experience, interface consistency, and error handling from a user's perspective.",
+    ),
 ]
 
 
