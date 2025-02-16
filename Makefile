@@ -28,7 +28,7 @@ apply_formatting:
 check_formatting:
 	$(VENV_BIN)/black --check .
 	$(VENV_BIN)/isort --check-only .
-	$(VENV_BIN)/mypy .
+	$(VENV_BIN)/mypy src/ tests/
 
 # Run tests with pytest
 test:
