@@ -2,9 +2,22 @@
 This repo represents Tymofii Antonenko's implementation of test task by Devico.
 
 ## Prerequesites/tech details
-1. Python 3.11+
+1. Python 3.9+. In `Makefile` I'm using Python 3.11. If you don't have 3.11,
+please select any other version which you have locally and which is at least 3.9 or newer. It's due to typing compitability.
 2. OpenAI API key [https://platform.openai.com/api-keys]
-2. If installing dependencies fails, try to upgrade pip
+
+
+## How to run (assuming you are on some Linux distro or on Mac and you have `make` command)
+1. `make install`
+2. Add `OPENAI_API_KEY` env variable into generated `.env` file
+3. Check and modify if necessary `INPUT_PATH` and `OUTPUT_PATH` into `.env` file
+4. Place your inputs into `INPUT_PATH` (`initial_data` by default). Basically you should add direcotries, which contain:
+ - `.json` file with extracted interactive elements
+ - `.html` code of simplified web pages
+ - `page_description.txt` which gives a basic information about the page
+5. `make run`
+4. Check `OUTPUT_PATH` (`output` by default) for the results.
+
 
 
 ## Assumptions
@@ -22,4 +35,4 @@ This repo represents Tymofii Antonenko's implementation of test task by Devico.
 ## TODO / Potential improvements
 1) Handle case when html is too big and doesn't fit into one prompt
 2) Add usage of multithreading/multiprocessing.  
-I didn't do it because I already was getting 429 - Too Many Requests
+I didn't do it because I already was getting `429 - Too Many Requests`.

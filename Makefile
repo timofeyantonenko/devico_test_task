@@ -14,6 +14,8 @@ install:
 	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
 	$(VENV_BIN)/pip install -U pip
 	$(VENV_BIN)/pip install -r requirements.txt
+	test -f .env.example || (echo ".env.example file is missing" && exit 1)
+	test -f .env || cp .env.example .env
 
 # Run the application
 run:
