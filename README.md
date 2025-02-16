@@ -41,7 +41,12 @@ initial_data/
 ```
 The inputs will be analyses by using `app_url_routes.json`.  
 So if the file doesn't have the routes - they will not be analysed.
-5. `make run`
+
+5. Run the generator:
+```bash
+make run
+```
+
 6. Check `OUTPUT_PATH` (`output` by default) for the results:
    - JSON files with test cases
    - Excel spreadsheets for each page
