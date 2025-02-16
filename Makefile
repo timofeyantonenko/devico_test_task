@@ -1,7 +1,7 @@
 .PHONY: run apply_formatting check_formatting test clean install
 
 # Python settings
-PYTHON := python3
+PYTHON := python3.11
 VENV := venv
 VENV_BIN := $(VENV)/bin
 
