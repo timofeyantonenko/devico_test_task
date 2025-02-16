@@ -176,3 +176,7 @@ cython_debug/
 
 # MacOS
 .DS_Store
+
+
+# Project specific
+output/
