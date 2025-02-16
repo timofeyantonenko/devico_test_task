@@ -71,6 +71,7 @@ make run
   - [Vellum](https://www.vellum.ai/llm-leaderboard)
   - [LM Arena](https://lmarena.ai/?leaderboard)
   - [Aider](https://aider.chat/docs/leaderboards/)
+
 Based on all of this, I think `gpt-4o` should be fine as the default.
 
 ## TODO / Potential improvements
