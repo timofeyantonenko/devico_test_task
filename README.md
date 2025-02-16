@@ -1,6 +1,9 @@
 # Test cases generator
 This repo represents Tymofii Antonenko's implementation of test task by Devico.
 
+## Logic of implementation
+For logic details please take a look at `LOGIC_DESCRIPTION.md`.
+
 ## Prerequesites/tech details
 1. Python 3.9+. In `Makefile` I'm using Python 3.11. If you don't have 3.11,
 please select any other version which you have locally and which is at least 3.9 or newer. It's due to typing compitability.
