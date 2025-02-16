@@ -3,12 +3,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.main import (
-    MODEL_NAME,
-    TestCaseGenerator,
-    TestGenerationResultWithMetadata,
-    TestPerspective,
-)
+from src.main import (MODEL_NAME, TestCaseGenerator,
+                      TestGenerationResultWithMetadata, TestPerspective)
 
 
 class MockUsageInfo:
