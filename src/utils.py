@@ -44,11 +44,7 @@ def openai_api_calculate_cost(usage, model):
         raise ValueError(f"Invalid model specified: {model}")
 
     # Get cached tokens count
-    cached_tokens = (
-        usage.prompt_tokens_details.cached_tokens
-        if hasattr(usage, "prompt_tokens_details")
-        else 0
-    )
+    cached_tokens = usage.prompt_tokens_details.cached_tokens if hasattr(usage, "prompt_tokens_details") else 0
 
     # Calculate non-cached prompt tokens
     non_cached_prompt_tokens = usage.prompt_tokens - cached_tokens
@@ -80,9 +76,7 @@ def create_excel_file(test_cases_data: list, filepath: Path):
     ws.title = "Test Cases"  # type: ignore
 
     # Define styles
-    header_fill = PatternFill(
-        start_color="366092", end_color="366092", fill_type="solid"
-    )
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
     header_font = Font(color="FFFFFF", bold=True)
     wrap_alignment = Alignment(wrap_text=True, vertical="top")
 

@@ -27,9 +27,7 @@ EXPERT_TEMPERATURE = float(os.getenv("EXPERT_TEMPERATURE", "0.3"))
 RETRY_ATTEMPTS = int(os.getenv("RETRY_ATTEMPTS", "3"))
 
 APP_URL_ROUTES_FILE_NAME = os.getenv("APP_URL_ROUTES_FILE_NAME", "app_url_routes.json")
-APP_DESCRIPTION_FILE_NAME = os.getenv(
-    "APP_DESCRIPTION_FILE_NAME", "app_description.txt"
-)
+APP_DESCRIPTION_FILE_NAME = os.getenv("APP_DESCRIPTION_FILE_NAME", "app_description.txt")
 
 
 class TestPerspective(Enum):
@@ -232,18 +230,14 @@ class TestCaseGenerator:
         # Load JSON content
         json_files = list(dir_path.glob("*.json"))
         if len(json_files) == 1:
-            data["elements"] = self._load_json(
-                str(json_files[0].relative_to(self.base_path))
-            )
+            data["elements"] = self._load_json(str(json_files[0].relative_to(self.base_path)))
         else:
             logger.warning(f"Found {len(json_files)} JSON files for {page_dir}")
 
         # Load page description
         desc_file = dir_path / "page_description.txt"
         if desc_file.exists():
-            data["description"] = self._load_text(
-                str(desc_file.relative_to(self.base_path))
-            )
+            data["description"] = self._load_text(str(desc_file.relative_to(self.base_path)))
 
         return data
 
@@ -256,9 +250,7 @@ class TestCaseGenerator:
 
             # Calculate full path
             if current_path:  # If it's not root or empty
-                full_path = (
-                    f"{parent_path}_{current_path}" if parent_path else current_path
-                )
+                full_path = f"{parent_path}_{current_path}" if parent_path else current_path
                 paths.append(full_path)
             else:  # For root path "/"
                 full_path = parent_path  # Keep parent path without adding anything
@@ -288,9 +280,7 @@ class TestCaseGenerator:
         stop=stop_after_attempt(RETRY_ATTEMPTS),
         wait=wait_exponential(multiplier=1, min=4, max=60),
     )
-    def _generate_test_cases_with_retry(
-        self, prompt: str, temperature: float
-    ) -> TestGenerationResultWithMetadata:
+    def _generate_test_cases_with_retry(self, prompt: str, temperature: float) -> TestGenerationResultWithMetadata:
         """Generate test cases using OpenAI API with retry logic"""
         try:
             response = self._client.beta.chat.completions.parse(
@@ -376,9 +366,7 @@ class TestCaseGenerator:
             logger.error(f"Error in expert validation: {e}")
             raise
 
-    def _create_expert_prompt(
-        self, test_results: list[TestGenerationResultWithMetadata], page_data: dict
-    ) -> str:
+    def _create_expert_prompt(self, test_results: list[TestGenerationResultWithMetadata], page_data: dict) -> str:
         """Create prompt for expert validation"""
         # Group test cases by perspective for better organization
         test_cases_by_perspective: dict[str, list] = {}
@@ -483,9 +471,7 @@ class TestCaseGenerator:
         }
         return guidance.get(perspective.name, "")
 
-    def _create_page_prompt(
-        self, page_data: dict, perspective: PerspectiveConfig
-    ) -> str:
+    def _create_page_prompt(self, page_data: dict, perspective: PerspectiveConfig) -> str:
         """Create prompt for testing the entire page from a specific perspective"""
         return f"""
         Create comprehensive test cases for a web page with the following details:
@@ -509,46 +495,34 @@ class TestCaseGenerator:
         {self._get_perspective_specific_guidance(perspective)}
         """
 
-    def _generate_test_cases_for_page(
-        self, page_data: dict
-    ) -> ExpertValidatedTestsWithMetadata:
+    def _generate_test_cases_for_page(self, page_data: dict) -> ExpertValidatedTestsWithMetadata:
         """Generate test cases using multiple runs and expert validation"""
         all_test_results = []
 
         # Generate page-level test cases from different perspectives
         for perspective in TEST_PERSPECTIVES:
             prompt = self._create_page_prompt(page_data, perspective)
-            result = self._generate_test_cases_with_retry(
-                prompt, perspective.temperature
-            )
+            result = self._generate_test_cases_with_retry(prompt, perspective.temperature)
             all_test_results.append(result)
 
         # Generate element-level test cases
         elements = page_data.get("elements", {})
         for element_id, element_data in elements.items():
-            element_context = self._extract_element_context(
-                element_id, element_data, page_data.get("html", "")
-            )
-            element_results = self._generate_element_test_cases(
-                element_context, page_data
-            )
+            element_context = self._extract_element_context(element_id, element_data, page_data.get("html", ""))
+            element_results = self._generate_element_test_cases(element_context, page_data)
             all_test_results.extend(element_results)
 
         # Have expert validate and curate all results
         return self._validate_with_expert(all_test_results, page_data)
 
-    def _extract_element_context(
-        self, element_id: str, element_data: dict | list, html_content: str
-    ) -> ElementContext:
+    def _extract_element_context(self, element_id: str, element_data: dict | list, html_content: str) -> ElementContext:
         """Extract context for a specific element including surrounding HTML"""
         # Handle case where element_data is a list
         if isinstance(element_data, list):
             return ElementContext(
                 element_id=element_id,
                 element_type="list",  # or some other appropriate type for list elements
-                element_data={
-                    "items": element_data
-                },  # wrap list in a dict for consistency
+                element_data={"items": element_data},  # wrap list in a dict for consistency
                 surrounding_html=html_content,
             )
         # Handle case where element_data is a dict
@@ -575,12 +549,8 @@ class TestCaseGenerator:
         results = []
 
         for perspective in TEST_PERSPECTIVES:
-            prompt = self._create_element_prompt(
-                element_context, page_data, perspective
-            )
-            result = self._generate_test_cases_with_retry(
-                prompt, perspective.temperature
-            )
+            prompt = self._create_element_prompt(element_context, page_data, perspective)
+            result = self._generate_test_cases_with_retry(prompt, perspective.temperature)
             results.append(result)
 
         return results
@@ -630,9 +600,7 @@ class TestCaseGenerator:
             if (self.base_path / page_path).is_dir():
                 page_data = self._load_page_data(page_path)
                 if page_data:
-                    test_cases[page_path] = self._generate_test_cases_for_page(
-                        page_data
-                    )
+                    test_cases[page_path] = self._generate_test_cases_for_page(page_data)
                     logger.info(f"Generated test cases for {page_path}")
             else:
                 logger.warning(f"Directory not found: {self.base_path / page_path}")

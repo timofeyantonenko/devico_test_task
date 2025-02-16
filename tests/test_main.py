@@ -3,8 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.main import (MODEL_NAME, TestCaseGenerator,
-                      TestGenerationResultWithMetadata, TestPerspective)
+from src.main import MODEL_NAME, TestCaseGenerator, TestGenerationResultWithMetadata, TestPerspective
 
 
 class MockUsageInfo:
@@ -201,9 +200,7 @@ def test_extract_element_context(test_generator):
     element_data = {"type": "input", "required": True}
     html_content = "<div><input id='test-input' required /></div>"
 
-    context = test_generator._extract_element_context(
-        element_id, element_data, html_content
-    )
+    context = test_generator._extract_element_context(element_id, element_data, html_content)
 
     assert context.element_id == element_id
     assert context.element_type == "input"
@@ -233,6 +230,4 @@ def test_openai_api_calculate_cost(usage, model, expected_total):
     result = openai_api_calculate_cost(usage, model)
     assert isinstance(result, dict)
     assert "total_cost" in result
-    assert (
-        abs(result["total_cost"] - expected_total) < 0.0001
-    )  # Allow for small float differences
+    assert abs(result["total_cost"] - expected_total) < 0.0001  # Allow for small float differences
